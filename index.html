@@ -1249,7 +1249,8 @@ const isStandalone=()=>matchMedia("(display-mode: standalone)").matches||navigat
 const inFrame=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 
 window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;$("installNow").hidden=false;showInstall(false)});
-window.addEventListener("appinstalled",()=>{$("installCard").hidden=true;$("installBtn").hidden=true;lsSet(LS_INSTALL,"done");toast("App instalada")});
+window.addEventListener("appinstalled",()=>{$("installCard").hidden=true;markInstalled();lsSet(LS_INSTALL,"done");toast("App instalada")});
+function markInstalled(){const b=$("installBtn");b.textContent="✓ App instalada";b.disabled=true;b.title="Ya estás usando la app instalada"}
 const LS_INSTALL="agenda.install.v1";
 function installSteps(){
   const ua=navigator.userAgent||"";
@@ -1260,21 +1261,28 @@ function installSteps(){
   return["Abre esta página en Chrome o Edge.","Busca el ícono de instalar en la barra de direcciones, o abre el menú ⋮.","Elige «Instalar Mi agenda» o «Guardar y compartir › Crear acceso directo»."];
 }
 function showInstall(force){
-  if(isStandalone()){$("installBtn").hidden=true;return}
+  if(isStandalone()){markInstalled();return}
   if(!force&&lsGet(LS_INSTALL,null))return;
   const steps=deferredPrompt?[]:installSteps();
   if(inFrame&&!deferredPrompt)steps.unshift("Primero abre la página en su propia pestaña (menú del artefacto › abrir en el navegador), así el navegador la reconoce como app.");
   $("installSteps").innerHTML=steps.map(t=>"<li>"+esc(t)+"</li>").join("");
   $("installCard").hidden=false;
 }
-$("installBtn").onclick=()=>{showInstall(true);$("installCard").scrollIntoView({behavior:"smooth",block:"start"})};
+$("installBtn").onclick=async()=>{
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    try{const r=await deferredPrompt.userChoice;if(r.outcome==="accepted"){$("installCard").hidden=true;lsSet(LS_INSTALL,"done")}}catch(e){}
+    deferredPrompt=null;$("installNow").hidden=true;return;
+  }
+  showInstall(true);$("installCard").scrollIntoView({behavior:"smooth",block:"start"});
+};
 $("installClose").onclick=()=>{$("installCard").hidden=true;lsSet(LS_INSTALL,"seen")};
 $("installNow").onclick=async()=>{
   if(!deferredPrompt)return;deferredPrompt.prompt();
   try{const r=await deferredPrompt.userChoice;if(r.outcome==="accepted"){$("installCard").hidden=true;lsSet(LS_INSTALL,"done")}}catch(e){}
   deferredPrompt=null;$("installNow").hidden=true;
 };
-if(isStandalone())$("installBtn").hidden=true;
+if(isStandalone())markInstalled();
 setTimeout(()=>showInstall(false),600);
 
 /* ---------- Borrar datos ---------- */
