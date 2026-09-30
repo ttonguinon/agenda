@@ -771,9 +771,17 @@ $("form").addEventListener("submit",e=>{
     title,date,start,end,cat:$("fCat").value,repeat:$("fRep").value,notes:$("fNotes").value.trim(),place:$("fPlace").value.trim(),withWho:$("fWith").value.trim(),
     alarm:{on:alarmOn,offset,sound:$("fSound").value,custom:offset==="custom"?custom:""},alarmManual:true
   });
-  // Si cambió la programación, permite que la alarma vuelva a sonar
-  Object.keys(fired).forEach(k=>{if(k.startsWith(a.id+"@"))delete fired[k]});
-  Object.keys(snoozes).forEach(k=>{if(k.startsWith(a.id+"@"))delete snoozes[k]});
+  // Solo si cambió la programación de la alarma se permite que vuelva a sonar;
+  // las alarmas cuya hora ya pasó no suenan de nuevo al guardar.
+  const sig=x=>x?JSON.stringify([x.date,x.start,x.repeat,x.alarm&&x.alarm.on,x.alarm&&x.alarm.offset,x.alarm&&x.alarm.custom]):"";
+  if(!editing||sig(editing)!==sig(a)){
+    Object.keys(fired).forEach(k=>{if(k.startsWith(a.id+"@"))delete fired[k]});
+    Object.keys(snoozes).forEach(k=>{if(k.startsWith(a.id+"@"))delete snoozes[k]});
+    const nowD=new Date(),i0=acts.findIndex(x=>x.id===a.id),prev=acts[i0];
+    if(i0>=0)acts[i0]=a;else acts.push(a);
+    alarmsBetween(new Date(nowD-6*3600e3),nowD).filter(x=>x.a.id===a.id).forEach(x=>{fired[a.id+"@"+x.ds]=Date.now()});
+    if(i0>=0)acts[i0]=prev;else acts.pop();
+  }
   lsSet(LS_FIRED,fired);lsSet(LS_SNZ,snoozes);
   selected=date;const d=parseD(date);view=new Date(d.getFullYear(),d.getMonth(),1);
   saveAct(a);$("dlg").close();
