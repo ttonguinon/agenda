@@ -95,6 +95,10 @@ button{cursor:pointer}
 .co3prev .it span{overflow-wrap:break-word}
 .co3prev .it small{display:block;color:var(--muted)}
 .co3prev .upd{color:var(--amber);font-weight:700}
+.danger-zone{border:1px solid var(--danger);border-radius:12px;padding:12px 14px;background:var(--red-soft)}
+.danger-zone b{color:var(--danger)}
+.danger-zone p{margin:4px 0 10px;font-size:.88rem;color:var(--muted)}
+.danger-zone .btn{background:var(--surface)}
 .opts{display:flex;flex-direction:column;gap:10px}
 .opt{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface2);font-weight:700}
 .opt small{display:block;font-weight:400;color:var(--muted)}
@@ -402,6 +406,19 @@ dialog::backdrop{background:rgba(10,20,18,.55)}
   </div>
 </dialog>
 
+<dialog id="wipeDlg" aria-labelledby="wipeTitle">
+  <div class="form">
+    <h2 id="wipeTitle">¿Borrar todo?</h2>
+    <p id="wipeText" style="margin:0"></p>
+    <div class="f"><label for="wipeConfirm">Para confirmar, escribe <b>BORRAR</b></label><input id="wipeConfirm" autocomplete="off" autocapitalize="characters"></div>
+    <div class="actions">
+      <button type="button" class="btn" id="wipeExport">📊 Exportar respaldo</button>
+      <button type="button" class="btn" id="wipeCancel">Cancelar</button>
+      <button type="button" class="btn primary" id="wipeGo" disabled style="background:var(--danger);border-color:var(--danger)">Borrar</button>
+    </div>
+  </div>
+</dialog>
+
 <dialog id="setDlg" aria-labelledby="setTitle">
   <div class="form">
     <h2 id="setTitle">Ajustes del calendario</h2>
@@ -409,6 +426,14 @@ dialog::backdrop{background:rgba(10,20,18,.55)}
       <label class="opt" for="optSun"><span>Domingos en rojo<small>Resalta los domingos en el calendario y en la vista por mes.</small></span><input type="checkbox" id="optSun" role="switch"></label>
       <label class="opt" for="optSat"><span>Sábados en rojo<small>Útil si no trabajas los sábados.</small></span><input type="checkbox" id="optSat" role="switch"></label>
       <label class="opt" for="optHol"><span>Festivos de Colombia en rojo<small>Se calculan solos cada año, incluidos los que pasan al lunes y los de Semana Santa.</small></span><input type="checkbox" id="optHol" role="switch"></label>
+    </div>
+    <div class="danger-zone">
+      <b>Borrar datos</b>
+      <p>Elimina actividades de este dispositivo. Te recomendamos exportar a Excel antes, como respaldo.</p>
+      <div class="actions" style="justify-content:flex-start">
+        <button type="button" class="btn danger" id="wipeImp">🗑️ Solo las importadas del Excel</button>
+        <button type="button" class="btn danger" id="wipeAll">🗑️ Borrar todo</button>
+      </div>
     </div>
     <div class="actions"><button type="button" class="btn primary" id="setClose">Listo</button></div>
   </div>
@@ -1251,6 +1276,32 @@ $("installNow").onclick=async()=>{
 };
 if(isStandalone())$("installBtn").hidden=true;
 setTimeout(()=>showInstall(false),600);
+
+/* ---------- Borrar datos ---------- */
+let wipeMode="all";
+function openWipe(mode){
+  wipeMode=mode;
+  const n=mode==="all"?acts.length:acts.filter(a=>a.src==="co3").length;
+  if(!n){toast(mode==="all"?"No hay actividades para borrar.":"No hay actividades importadas.");return}
+  $("wipeTitle").textContent=mode==="all"?"¿Borrar todo?":"¿Borrar las importadas?";
+  $("wipeText").textContent=(mode==="all"?(n===1?"Se eliminará la única actividad guardada":"Se eliminarán las "+n+" actividades guardadas")+" en este dispositivo, con sus alarmas.":(n===1?"Se eliminará la actividad importada":"Se eliminarán las "+n+" actividades importadas")+" del Excel. Las que creaste a mano se conservan.")+" Tus ajustes se mantienen.";
+  $("wipeConfirm").value="";$("wipeGo").disabled=true;
+  $("setDlg").close();$("wipeDlg").showModal();setTimeout(()=>$("wipeConfirm").focus(),30);
+}
+$("wipeAll").onclick=()=>openWipe("all");
+$("wipeImp").onclick=()=>openWipe("co3");
+$("wipeConfirm").addEventListener("input",()=>{$("wipeGo").disabled=$("wipeConfirm").value.trim().toUpperCase()!=="BORRAR"});
+$("wipeCancel").onclick=()=>$("wipeDlg").close();
+$("wipeExport").onclick=()=>{const r=$("range").value;$("range").value="todo";exportExcel().finally(()=>{$("range").value=r})};
+$("wipeGo").onclick=()=>{
+  const snap={acts:JSON.parse(JSON.stringify(acts)),fired:Object.assign({},fired),snoozes:Object.assign({},snoozes)};
+  const n=wipeMode==="all"?acts.length:acts.filter(a=>a.src==="co3").length;
+  if(wipeMode==="all"){acts=[];fired={};snoozes={}}
+  else{const gone=new Set(acts.filter(a=>a.src==="co3").map(a=>a.id));acts=acts.filter(a=>!gone.has(a.id));
+    Object.keys(fired).forEach(k=>{if(gone.has(k.split("@")[0]))delete fired[k]});Object.keys(snoozes).forEach(k=>{if(gone.has(k.split("@")[0]))delete snoozes[k]})}
+  lsSet(LS_FIRED,fired);lsSet(LS_SNZ,snoozes);persistLocal();upOpen.clear();renderAll();$("wipeDlg").close();
+  toast(n+(n===1?" actividad borrada":" actividades borradas"),"Deshacer",()=>{acts=snap.acts;fired=snap.fired;snoozes=snap.snoozes;lsSet(LS_FIRED,fired);lsSet(LS_SNZ,snoozes);persistLocal();renderAll();toast("Datos restaurados")});
+};
 
 /* ---------- Ajustes ---------- */
 $("settingsBtn").onclick=()=>{$("optSun").checked=prefs.redSun;$("optSat").checked=prefs.redSat;$("optHol").checked=prefs.redHol;$("setDlg").showModal()};
