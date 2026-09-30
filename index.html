@@ -20,7 +20,7 @@
 :root{
   --bg:#E8ECE9;--surface:#FFFFFF;--surface2:#F3F6F4;--ink:#101A18;--muted:#44524E;--line:#C6D0CB;
   --pine:#2E6A5C;--pine-soft:#DCEBE6;--amber:#C98710;--amber-soft:#FBEFD6;--danger:#C62828;--red:#C62828;--red-soft:#FDECEC;
-  --c1:#2E6A5C;--c2:#3F6FB0;--c3:#8A5CB8;--c4:#C0567A;--c5:#6B7775;
+  --c1:#12806A;--c2:#1F5FD1;--c3:#8A3FD1;--c4:#D62F74;--c5:#5B6B67;
   --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
   --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
   box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
@@ -29,11 +29,11 @@
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#0C1110;--surface:#18201E;--surface2:#222D2A;--ink:#F5F8F7;--muted:#B9C6C2;--line:#3A4844;
   --pine:#6BBBA8;--pine-soft:#20382F;--amber:#F0B64A;--amber-soft:#3A2F17;--danger:#FF6B6B;--red:#FF7B72;--red-soft:#3A1F1F;
-  --c1:#6BBBA8;--c2:#7FA6E0;--c3:#B797DE;--c4:#E488A8;--c5:#9AA8A4;color-scheme:dark;}}
+  --c1:#45E0B8;--c2:#6FAEFF;--c3:#C99BFF;--c4:#FF7FB3;--c5:#B9C6C2;color-scheme:dark;}}
 :root[data-theme="dark"]{
   --bg:#0C1110;--surface:#18201E;--surface2:#222D2A;--ink:#F5F8F7;--muted:#B9C6C2;--line:#3A4844;
   --pine:#6BBBA8;--pine-soft:#20382F;--amber:#F0B64A;--amber-soft:#3A2F17;--danger:#FF6B6B;--red:#FF7B72;--red-soft:#3A1F1F;
-  --c1:#6BBBA8;--c2:#7FA6E0;--c3:#B797DE;--c4:#E488A8;--c5:#9AA8A4;color-scheme:dark;}
+  --c1:#45E0B8;--c2:#6FAEFF;--c3:#C99BFF;--c4:#FF7FB3;--c5:#B9C6C2;color-scheme:dark;}
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5}
@@ -172,6 +172,33 @@ button{cursor:pointer}
 .upcoming summary .ttl{font-family:var(--display);font-size:1.06rem;font-weight:800;color:var(--ink)}
 .upcoming summary .when{color:var(--ink);opacity:.8}
 .mrow .t{font-family:var(--display);font-weight:800;color:var(--ink)}
+/* ---- Más color ---- */
+.clock{background:linear-gradient(100deg,var(--pine),var(--c2) 70%,var(--c3));-webkit-background-clip:text;background-clip:text;color:transparent}
+.clock small{-webkit-text-fill-color:var(--muted)}
+.next{background:linear-gradient(120deg,var(--amber-soft),color-mix(in srgb,var(--c4) 14%,var(--surface)));border-left-color:var(--amber)}
+.next .t{color:var(--amber)}
+.dayhead h2,.calhead h2,.mhead h2{color:var(--pine)}
+.panel{border-top:4px solid var(--pine)}
+#viewCal .panel+.panel{border-top-color:var(--c2)}
+#viewMes.panel{border-top-color:var(--c3)}
+#viewRep.panel{border-top-color:var(--amber)}
+.day.has:not(.out){background:color-mix(in srgb,var(--dc) 24%,var(--surface2))}
+.day.has:not(.out) .n{color:color-mix(in srgb,var(--dc) 75%,var(--ink))}
+.legend span{background:color-mix(in srgb,currentColor 0%,var(--surface2));border-radius:999px;padding:3px 10px 3px 8px;color:var(--ink);font-weight:700}
+.item{background:color-mix(in srgb,var(--cat) 16%,var(--surface))!important;border-color:color-mix(in srgb,var(--cat) 35%,var(--line))!important}
+.item .title{color:var(--cat)!important;font-size:1.22rem!important;line-height:1.25;text-shadow:none}
+.item .time{color:var(--ink)}
+.upcoming details{background:color-mix(in srgb,var(--cat) 14%,var(--surface));border-color:color-mix(in srgb,var(--cat) 30%,var(--line))}
+.upcoming details[open]{background:color-mix(in srgb,var(--cat) 20%,var(--surface))}
+.upcoming summary .ttl{color:var(--cat)!important;font-size:1.1rem!important}
+.upday{color:var(--pine)}
+.mrow{background:color-mix(in srgb,var(--cat) 12%,var(--surface))}
+.mrow .t{color:var(--cat)!important;font-size:1.05rem}
+.mrow .t small{color:var(--muted)}
+.month h3{color:var(--c3)}
+.reptable th{background:linear-gradient(180deg,var(--pine),color-mix(in srgb,var(--pine) 80%,#000))}
+.tab[aria-selected="true"]{background:linear-gradient(120deg,var(--pine),var(--c2))!important;color:#fff!important}
+.btn.primary{background:linear-gradient(120deg,var(--pine),color-mix(in srgb,var(--pine) 60%,var(--c2)))}
 .item.done .title{text-decoration:line-through;color:var(--muted)}
 .chk{width:22px;height:22px;margin-top:2px;accent-color:var(--pine)}
 .al{font-size:.84rem;color:var(--amber);white-space:nowrap}
@@ -782,7 +809,8 @@ function renderCal(){
     const hasAl=list.some(a=>a.alarm&&a.alarm.on);
     const hol=holidayName(d);
     const label=fmtLong(d)+(hol?", festivo: "+hol:"")+(list.length?", "+list.length+(list.length===1?" actividad":" actividades"):"");
-    html+='<button class="'+cls.join(" ")+'" data-d="'+ds+'" aria-label="'+esc(label)+'"'+(hol?' title="'+esc(hol)+'"':'')+(ds===selected?' aria-pressed="true"':'')+'><span class="n">'+d.getDate()+'</span>'+(hasAl?'<span class="bell" aria-hidden="true">⏰</span>':'')+'<span class="dots">'+dots+'</span></button>';
+    if(list.length&&!cls.includes("red"))cls.push("has");
+    html+='<button style="--dc:'+(list.length?(CATS[list[0].cat]||CATS.otro).c:'transparent')+'" class="'+cls.join(" ")+'" data-d="'+ds+'" aria-label="'+esc(label)+'"'+(hol?' title="'+esc(hol)+'"':'')+(ds===selected?' aria-pressed="true"':'')+'><span class="n">'+d.getDate()+'</span>'+(hasAl?'<span class="bell" aria-hidden="true">⏰</span>':'')+'<span class="dots">'+dots+'</span></button>';
   }
   $("days").innerHTML=html;
 }
