@@ -1,6 +1,6 @@
 /* Service worker de Mi agenda: permite abrir la app sin internet.
    Al publicar una versión nueva, cambia el número de VERSION. */
-const VERSION = "mi-agenda-v4";
+const VERSION = "mi-agenda-v5";
 const APP_SHELL = [
   "./",
   "./index.html",

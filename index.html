@@ -18,8 +18,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#EEF1EC;--surface:#FFFFFF;--surface2:#F5F7F4;--ink:#1C2826;--muted:#5E6B68;--line:#D6DDD8;
-  --pine:#2E6A5C;--pine-soft:#DCEBE6;--amber:#C98710;--amber-soft:#FBEFD6;--danger:#B3413A;--red:#C62828;--red-soft:#FDECEC;
+  --bg:#E8ECE9;--surface:#FFFFFF;--surface2:#F3F6F4;--ink:#101A18;--muted:#44524E;--line:#C6D0CB;
+  --pine:#2E6A5C;--pine-soft:#DCEBE6;--amber:#C98710;--amber-soft:#FBEFD6;--danger:#C62828;--red:#C62828;--red-soft:#FDECEC;
   --c1:#2E6A5C;--c2:#3F6FB0;--c3:#8A5CB8;--c4:#C0567A;--c5:#6B7775;
   --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
   --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
@@ -27,12 +27,12 @@
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#121917;--surface:#1B2422;--surface2:#212C29;--ink:#E6ECEA;--muted:#9AA8A4;--line:#2E3A36;
-  --pine:#6BBBA8;--pine-soft:#20382F;--amber:#F0B64A;--amber-soft:#3A2F17;--danger:#E07A72;--red:#FF7B72;--red-soft:#3A1F1F;
+  --bg:#0C1110;--surface:#18201E;--surface2:#222D2A;--ink:#F5F8F7;--muted:#B9C6C2;--line:#3A4844;
+  --pine:#6BBBA8;--pine-soft:#20382F;--amber:#F0B64A;--amber-soft:#3A2F17;--danger:#FF6B6B;--red:#FF7B72;--red-soft:#3A1F1F;
   --c1:#6BBBA8;--c2:#7FA6E0;--c3:#B797DE;--c4:#E488A8;--c5:#9AA8A4;color-scheme:dark;}}
 :root[data-theme="dark"]{
-  --bg:#121917;--surface:#1B2422;--surface2:#212C29;--ink:#E6ECEA;--muted:#9AA8A4;--line:#2E3A36;
-  --pine:#6BBBA8;--pine-soft:#20382F;--amber:#F0B64A;--amber-soft:#3A2F17;--danger:#E07A72;--red:#FF7B72;--red-soft:#3A1F1F;
+  --bg:#0C1110;--surface:#18201E;--surface2:#222D2A;--ink:#F5F8F7;--muted:#B9C6C2;--line:#3A4844;
+  --pine:#6BBBA8;--pine-soft:#20382F;--amber:#F0B64A;--amber-soft:#3A2F17;--danger:#FF6B6B;--red:#FF7B72;--red-soft:#3A1F1F;
   --c1:#6BBBA8;--c2:#7FA6E0;--c3:#B797DE;--c4:#E488A8;--c5:#9AA8A4;color-scheme:dark;}
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -80,6 +80,8 @@ button{cursor:pointer}
 .day.sel{border-color:var(--ink);background:var(--surface)}
 .dots{display:flex;gap:3px;flex-wrap:wrap}
 .dot{width:7px;height:7px;border-radius:50%}
+.day .dot{width:9px;height:9px}
+.day .dots{gap:4px}
 .bell{position:absolute;top:5px;right:6px;font-size:.72rem;color:var(--amber)}
 .dow div.red{color:var(--red);font-weight:700}
 .day.red:not(.out){background:var(--red-soft)}
@@ -124,6 +126,20 @@ button{cursor:pointer}
 .notebox{display:block;margin-top:8px;padding:8px 10px;border-radius:8px;background:var(--amber-soft);border-left:3px solid var(--amber);font-size:.78rem;line-height:1.45;color:var(--ink);white-space:pre-wrap;overflow-wrap:anywhere;font-weight:400}
 .item.done .notebox{opacity:.6}
 .item .notebox.full{grid-column:1/-1;margin-top:2px}
+.ico{width:20px;height:20px;display:inline-block;vertical-align:-4px;flex:none}
+.ib{color:var(--pine)}
+.ib.del{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 45%,var(--line))}
+.ib.del:hover{background:var(--danger);color:#fff}
+.btn.danger .ico{color:var(--danger)}
+.chip{display:inline-block;background:var(--cat);color:#fff;font-weight:700;font-size:.74rem;letter-spacing:.02em;border-radius:6px;padding:1px 7px;margin-right:4px;vertical-align:1px}
+:root[data-theme="dark"] .chip{color:#0C1110}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .chip{color:#0C1110}}
+.item{border:1px solid var(--line);border-left:5px solid var(--cat)}
+.item .title{font-family:var(--display);font-size:1.14rem;font-weight:800;letter-spacing:-.01em;color:var(--ink)}
+.item .time{color:var(--ink);opacity:.85}
+.upcoming summary .ttl{font-family:var(--display);font-size:1.06rem;font-weight:800;color:var(--ink)}
+.upcoming summary .when{color:var(--ink);opacity:.8}
+.mrow .t{font-family:var(--display);font-weight:800;color:var(--ink)}
 .item.done .title{text-decoration:line-through;color:var(--muted)}
 .chk{width:22px;height:22px;margin-top:2px;accent-color:var(--pine)}
 .al{font-size:.84rem;color:var(--amber);white-space:nowrap}
@@ -205,7 +221,7 @@ dialog::backdrop{background:rgba(10,20,18,.55)}
 .acts{display:flex;gap:4px}
 .ib{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;font-size:1rem;padding:0}
 .ib:hover{border-color:var(--pine)}
-.ib.del:hover{border-color:var(--danger);background:var(--red-soft)}
+
 @media (max-width:420px){.acts{flex-direction:column}}
 .choice{display:flex;flex-direction:column;gap:8px}
 .choice .btn{text-align:left}
@@ -466,6 +482,7 @@ const CATS={
 };
 const REP={none:"",daily:"Diario",weekdays:"Lun–vie",weekly:"Semanal",monthly:"Mensual"};
 const $=id=>document.getElementById(id);
+const ICO_DEL="<svg class=\"ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v6M14 11v6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>",ICO_EDIT="<svg class=\"ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>";
 const LS_ACTS="agenda.acts.v1",LS_FIRED="agenda.fired.v1",LS_SNZ="agenda.snooze.v1",LS_THEME="agenda.theme";
 
 function lsGet(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
@@ -647,15 +664,15 @@ function renderDay(){
   }
   $("list").innerHTML=list.map(a=>{
     const cat=CATS[a.cat]||CATS.otro,done=isDone(a,selected);
-    const meta=[cat.n,a.place||"",REP[a.repeat]||""].filter(Boolean).join(" · ");
+    const meta=[a.place||"",REP[a.repeat]||""].filter(Boolean).join(" · ");
     return '<li class="item'+(done?' done':'')+'" style="--cat:'+cat.c+'">'+
       '<input type="checkbox" class="chk" data-done="'+a.id+'" '+(done?'checked':'')+' aria-label="Marcar '+esc(a.title)+' como hecha">'+
       '<button class="open" data-edit="'+a.id+'">'+
         '<span class="top"><span class="time">'+(a.start?esc(fmtHM(a.start))+(a.end?' – '+esc(fmtHM(a.end)):''):'Todo el día')+'</span>'+(a.alarm&&a.alarm.on?'<span class="al">'+esc(alarmLabel(a))+'</span>':'')+'</span>'+
         '<span class="title" style="display:block">'+esc(a.title)+'</span>'+
         (a.withWho?'<span class="who">👤 '+esc(a.withWho)+'</span>':'')+
-        '<span class="meta" style="display:block">'+esc(meta)+'</span>'+
-        '</button>'+'<span class="acts"><button class="ib" data-edit="'+a.id+'" aria-label="Editar '+esc(a.title)+'" title="Editar">✏️</button><button class="ib del" data-del="'+a.id+'" data-ds="'+selected+'" aria-label="Eliminar '+esc(a.title)+'" title="Eliminar">🗑️</button></span>'+(a.notes?'<div class="notebox full">'+esc(a.notes)+'</div>':'')+'</li>';
+        '<span class="meta" style="display:block"><span class="chip">'+esc(cat.n)+'</span>'+(meta?' '+esc(meta):'')+'</span>'+
+        '</button>'+'<span class="acts"><button class="ib" data-edit="'+a.id+'" aria-label="Editar '+esc(a.title)+'" title="Editar">'+ICO_EDIT+'</button><button class="ib del" data-del="'+a.id+'" data-ds="'+selected+'" aria-label="Eliminar '+esc(a.title)+'" title="Eliminar">'+ICO_DEL+'</button></span>'+(a.notes?'<div class="notebox full">'+esc(a.notes)+'</div>':'')+'</li>';
   }).join("");
 }
 const upOpen=new Set();
@@ -690,8 +707,8 @@ function renderUpcoming(){
         
       '</dl>'+(a.notes?'<div class="notebox">'+esc(a.notes)+'</div>':'')+'<div class="actions">'+
         '<button class="btn" data-updone="'+a.id+'" data-ds="'+o.ds+'">'+(dn?'↩ Pendiente':'✓ Hecha')+'</button>'+
-        '<button class="btn" data-edit="'+a.id+'" data-ds="'+o.ds+'">✏️ Editar</button>'+
-        '<button class="btn danger" data-del="'+a.id+'" data-ds="'+o.ds+'">🗑️ Eliminar</button>'+
+        '<button class="btn" data-edit="'+a.id+'" data-ds="'+o.ds+'">'+ICO_EDIT+' Editar</button>'+
+        '<button class="btn danger" data-del="'+a.id+'" data-ds="'+o.ds+'">'+ICO_DEL+' Eliminar</button>'+
         '<button class="btn" data-goto="'+o.ds+'">📅 Ver día</button>'+
       '</div></div></details></li>';
   }
@@ -989,7 +1006,7 @@ function renderMonths(){
         '<span class="d'+(isRedDay(parseD(o.ds))?' red':'')+'">'+parseD(o.ds).getDate()+'<small>'+esc(parseD(o.ds).toLocaleDateString("es-CO",{weekday:"short"}))+'</small></span>'+
         '<button class="open" data-edit="'+a.id+'"><span class="top"><span>'+(a.start?esc(fmtHM(a.start))+(a.end?' – '+esc(fmtHM(a.end)):''):"Todo el día")+'</span>'+(a.alarm&&a.alarm.on?'<span class="al">'+esc(alarmLabel(a))+'</span>':'')+'</span>'+
         '<span class="t">'+esc(a.title)+'<small>'+esc([cat.n,a.place||"",a.withWho?"con "+a.withWho:"",REP[a.repeat]||"",dn?"Hecha":""].filter(Boolean).join(" · "))+'</small></span></button>'+
-        '<span class="acts"><button class="ib" data-edit="'+a.id+'" aria-label="Editar '+esc(a.title)+'" title="Editar">✏️</button><button class="ib del" data-del="'+a.id+'" data-ds="'+o.ds+'" aria-label="Eliminar '+esc(a.title)+'" title="Eliminar">🗑️</button></span></div>';
+        '<span class="acts"><button class="ib" data-edit="'+a.id+'" aria-label="Editar '+esc(a.title)+'" title="Editar">'+ICO_EDIT+'</button><button class="ib del" data-del="'+a.id+'" data-ds="'+o.ds+'" aria-label="Eliminar '+esc(a.title)+'" title="Eliminar">'+ICO_DEL+'</button></span></div>';
     }
     h+='</div></div>';
   }
