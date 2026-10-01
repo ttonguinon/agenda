@@ -106,8 +106,10 @@ button{cursor:pointer}
 .viewsel{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px 4px 4px 12px;max-width:100%}
 .viewsel label{font-weight:700;font-size:.9rem;white-space:nowrap}
 .viewsel select{border:none;background:var(--surface2);border-radius:9px;padding:8px 10px;min-height:40px;font-weight:700;max-width:62vw}
-.viewsel.off,.viewnote.off{display:none!important}
-.viewnote{margin:-6px 0 14px;padding:8px 12px;border-radius:10px;background:var(--pine-soft);color:var(--ink);font-size:.9rem}
+.viewnote.off,.viewnote[hidden]{display:none!important}
+.teambox{border:1px solid var(--line);border-left:5px solid var(--c2);border-radius:12px;padding:12px 14px;background:color-mix(in srgb,var(--c2) 8%,var(--surface))}
+.teambox select{width:100%;margin-top:6px;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 12px;min-height:44px;font-weight:700}
+.viewnote{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin:-6px 0 14px;padding:8px 12px;border-radius:10px;background:var(--pine-soft);color:var(--ink);font-size:.9rem}
 .person{display:inline-block;font-weight:800;font-size:.8rem;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:1px 7px;margin-bottom:3px}
 .chk.ro{visibility:hidden}
 .reptable{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
@@ -345,12 +347,8 @@ dialog::backdrop{background:rgba(10,20,18,.55)}
       <button class="tab" role="tab" id="tabMes" aria-selected="false" aria-controls="viewMes">Por mes</button>
       <button class="tab" role="tab" id="tabRep" aria-selected="false" aria-controls="viewRep">Reporte</button>
     </div>
-    <div class="viewsel" id="viewSelWrap" hidden>
-      <label for="viewSel">👤 Ver</label>
-      <select id="viewSel"></select>
-    </div>
   </div>
-  <p class="viewnote" id="viewNote" hidden></p>
+  <div class="viewnote" id="viewNote" hidden><span id="viewNoteText"></span><button type="button" class="btn" id="viewBack">↩ Volver a Mi agenda</button></div>
 
   <section class="panel" id="viewRep" role="tabpanel" aria-labelledby="tabRep" hidden>
     <div class="mhead">
@@ -540,6 +538,11 @@ dialog::backdrop{background:rgba(10,20,18,.55)}
 <dialog id="setDlg" aria-labelledby="setTitle">
   <div class="form">
     <h2 id="setTitle">Ajustes del calendario</h2>
+    <div class="teambox">
+      <label for="viewSel"><b>👤 Ver programación de</b></label>
+      <div id="viewSelWrap"><select id="viewSel"></select></div>
+      <p class="note" id="viewSelHint" style="margin:6px 0 0"></p>
+    </div>
     <div class="opts">
       <label class="opt" for="optSun"><span>Domingos en rojo<small>Resalta los domingos en el calendario y en la vista por mes.</small></span><input type="checkbox" id="optSun" role="switch"></label>
       <label class="opt" for="optSat"><span>Sábados en rojo<small>Útil si no trabajas los sábados.</small></span><input type="checkbox" id="optSat" role="switch"></label>
@@ -671,8 +674,8 @@ function teamActsOf(pk){
 function srcActs(){return viewKey==="me"||!team?acts:teamActsOf(viewKey)}
 function fillViewSel(){
   const w=$("viewSelWrap");if(!w)return;
-  if(!team||!team.people.length){w.hidden=true;viewKey="me";$("viewNote").hidden=true;return}
-  w.hidden=false;
+  if(!team||!team.people.length){w.hidden=true;viewKey="me";$("viewNote").hidden=true;$("viewSelHint").textContent="Importa el Excel de programación CO3 (📥 Importar) para poder ver la programación de cada funcionario o de todo el equipo.";return}
+  w.hidden=false;$("viewSelHint").textContent="Elige a un funcionario o a todo el equipo. Sus agendas son solo de consulta.";
   const mine=lsGet(LS_CO3P,"");
   $("viewSel").innerHTML='<option value="me">Mi agenda</option><option value="all">Todo el equipo</option>'+
     team.people.map(pe=>'<option value="'+esc(pe.key)+'">'+esc(tcase(pe.name))+(pe.key===mine?" (yo)":"")+'</option>').join("");
@@ -683,7 +686,7 @@ function syncViewNote(){
   const n=$("viewNote");
   if(viewKey==="me"){n.hidden=true;return}
   const pe=team&&team.people.find(x=>x.key===viewKey);
-  n.textContent=viewKey==="all"?"Viendo la programación de todo el equipo (solo consulta).":"Viendo la programación de "+(pe?tcase(pe.name):"")+" (solo consulta, sin alarmas).";
+  $("viewNoteText").textContent=viewKey==="all"?"Viendo la programación de todo el equipo (solo consulta).":"Viendo la programación de "+(pe?tcase(pe.name):"")+" (solo consulta, sin alarmas).";
   n.hidden=false;
 }
 function actsOn(ds){
@@ -1193,14 +1196,15 @@ $("months").addEventListener("click",e=>{
 function showTab(which){
   $("tabCal").setAttribute("aria-selected",which==="cal");$("tabMes").setAttribute("aria-selected",which==="mes");$("tabRep").setAttribute("aria-selected",which==="rep");
   $("viewCal").hidden=which!=="cal";$("viewMes").hidden=which!=="mes";$("viewRep").hidden=which!=="rep";
-  $("viewSelWrap").classList.toggle("off",which==="rep");$("viewNote").classList.toggle("off",which==="rep");
+  $("viewNote").classList.toggle("off",which==="rep");
   if(which==="mes")renderMonths();
   if(which==="rep")renderReport();
 }
 $("tabCal").onclick=()=>showTab("cal");
 $("tabMes").onclick=()=>showTab("mes");
 $("tabRep").onclick=()=>showTab("rep");
-$("viewSel").addEventListener("change",()=>{viewKey=$("viewSel").value;syncViewNote();upOpen.clear();renderAll()});
+$("viewSel").addEventListener("change",()=>{viewKey=$("viewSel").value;syncViewNote();upOpen.clear();renderAll();if(viewKey!=="me"){$("setDlg").close();showTab("cal");toast("Mostrando: "+$("viewSel").selectedOptions[0].textContent)}});
+$("viewBack").onclick=()=>{viewKey="me";$("viewSel").value="me";syncViewNote();upOpen.clear();renderAll()};
 
 /* ---------- Exportar a Excel ---------- */
 function offsetText(a){
@@ -1421,13 +1425,16 @@ function co3Items(){
   const[f,t]=co3Bounds();
   return co3.entriesFor(p,f,t).map(e=>{const pr=co3Parse(e.text,e.tipo);const cat=co3Cat(e.tipo,e.text);return Object.assign(e,pr,{cat,withWho:cat==="personal"?"":co3With(e,p),key:"co3|"+nrm(p.name)+"|"+e.ds})});
 }
+/* Actividades importadas antes para ese funcionario dentro del periodo */
+function co3Existing(pe,f,t){const pre="co3|"+nrm(pe.name)+"|";return acts.filter(a=>a.src==="co3"&&String(a.srcKey||"").startsWith(pre)&&a.date>=f&&a.date<=t)}
 function renderCO3(){
   $("co3Custom").hidden=$("co3Range").value!=="custom";
   const items=co3Items(),[f,t]=co3Bounds();
-  const upd=items.filter(i=>acts.some(a=>a.srcKey===i.key)).length;
+  const pk=co3.people[+$("co3Person").value];
+  const old=pk?co3Existing(pk,f,t):[],keep=old.filter(a=>a.done).length,repl=old.length-keep;
   $("co3Go").disabled=!items.length;
   $("co3Go").textContent=items.length?"Importar "+items.length:"Importar";
-  $("co3Prev").innerHTML='<div class="sum">'+(items.length?items.length+" actividades del "+esc(fmtShort(parseD(f)))+" al "+esc(fmtShort(parseD(t)))+(upd?' · <span class="upd">'+upd+" ya existen y se actualizarán</span>":""):"No hay actividades en ese periodo.")+'</div>'+
+  $("co3Prev").innerHTML='<div class="sum">'+(items.length?items.length+" actividades del "+esc(fmtShort(parseD(f)))+" al "+esc(fmtShort(parseD(t)))+(repl||keep?' · <span class="upd">'+(repl?"reemplaza "+repl+(repl===1?" importada antes":" importadas antes"):"")+(repl&&keep?"; ":"")+(keep?"conserva "+keep+(keep===1?" realizada":" realizadas"):"")+'</span>':""):"No hay actividades en ese periodo.")+'</div>'+
     items.map(i=>'<div class="it"><b>'+esc(parseD(i.ds).toLocaleDateString("es-CO",{weekday:"short",day:"numeric",month:"short"}))+'</b><span>'+esc(i.title)+'<small>'+esc([CATS[i.cat].n,i.place,i.withWho?"con "+i.withWho:""].filter(Boolean).join(" · "))+'</small></span></div>').join("");
 }
 function openCO3(parsed,fname){
@@ -1448,9 +1455,15 @@ $("co3Go").onclick=()=>{
   lsSet(LS_PEOPLE,co3.people.filter(q=>q!==p).map(q=>tcase(q.name)));
   if(co3.teamData){team=co3.teamData;team.file=co3.file||"";team.imported=Date.now();teamCache={};IDB.set("team",team).then(ok=>{if(!ok)toast("No se pudo guardar la programación del equipo.")});fillViewSel();fillRepPeriods()}
   const st=$("co3Start").value||"08:00",en=$("co3End").value||"";
-  let nNew=0,nUpd=0;
+  // Reemplazo: se eliminan las importadas antes en el periodo, salvo las marcadas como realizadas
+  const[bf,bt]=co3Bounds(),snap=JSON.parse(JSON.stringify(acts));
+  const old=co3Existing(p,bf,bt),gone=new Set(old.filter(a=>!a.done).map(a=>a.id));
+  acts=acts.filter(a=>!gone.has(a.id));
+  Object.keys(fired).forEach(k=>{if(gone.has(k.split("@")[0]))delete fired[k]});
+  let nNew=0,nUpd=0,nKeep=0;
   for(const i of items){
     const ex=acts.find(a=>a.srcKey===i.key);
+    if(ex&&ex.done){nKeep++;continue}
     const personal=i.cat==="personal";
     const a=Object.assign({},ex||{id:uid(),done:false,doneDates:[],created:Date.now()},{
       title:i.title,date:i.ds,start:personal?"":st,end:personal?"":en,cat:i.cat,repeat:"none",
@@ -1463,7 +1476,8 @@ $("co3Go").onclick=()=>{
   lsSet(LS_FIRED,fired);persistLocal();
   const d=parseD(items[0].ds);selected=items[0].ds;view=new Date(d.getFullYear(),d.getMonth(),1);
   renderAll();$("co3Dlg").close();showTab("cal");
-  toast(nNew+" importadas"+(nUpd?", "+nUpd+" actualizadas":""));
+  const nRep=gone.size;
+  toast(nNew+" importadas"+(nRep?" · "+nRep+" reemplazadas":"")+(nKeep?" · "+nKeep+(nKeep===1?" realizada conservada":" realizadas conservadas"):""),"Deshacer",()=>{acts=snap;persistLocal();renderAll();toast("Importación deshecha")});
 };
 
 /* ---------- Reporte por funcionario ---------- */
